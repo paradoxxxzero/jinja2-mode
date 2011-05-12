@@ -38,7 +38,7 @@
 
 (defconst jinja2-font-lock-indenting-keywords
   '(
-    "if" "else" "for" "block" "filter" "with"
+    "if" "else" "elif" "for" "block" "filter" "with"
     "raw" "macro" "autoescape" "trans" "call"
     ;; Hydra specific
     "auth" "showonmatch" "errorproof"))
@@ -177,7 +177,7 @@
   (if (bobp)  ; Check begining of buffer
       (indent-line-to (sgml-indent-line-num))
     (let ((not-indented t) (indent-width 2) cur-indent (html-indentation (sgml-indent-line-num)))
-      (if (looking-at "^[ \t]*{% *e\\(nd\\|lse\\)") ; Check close tag
+      (if (looking-at "^[ \t]*{% *e\\(nd\\|lse\\|lif\\)") ; Check close tag
 	  (progn
 	    (save-excursion
 	      (forward-line -1)
