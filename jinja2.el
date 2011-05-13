@@ -26,14 +26,18 @@
 
 (require 'sgml-mode)
 
-(defconst jinja2-font-lock-indenting-keywords
+(defconst jinja2-closing-keywords
   '(
-    "if" "else" "elif" "for" "block" "filter" "with"
+    "if" "for" "block" "filter" "with"
     "raw" "macro" "autoescape" "trans" "call"
     ;; Hydra specific
     "auth" "showonmatch" "errorproof"))
 
-(defconst jinja2-font-lock-builtin-keywords
+(defconst jinja2-indenting-keywords
+  (append jinja2-closing-keywords
+	  '("else" "elif" )))
+
+(defconst jinja2-builtin-keywords
   '(
     "as" "autoescape" "debug" "extends"
     "firstof" "in" "include" "load"
@@ -46,7 +50,7 @@
     "context" "with" "without" "ignore"
     "missing" "scoped"))
 
-(defconst jinja2-font-lock-functions-keywords
+(defconst jinja2-functions-keywords
   '(
     "abs" "attr" "batch" "capitalize"
     "center" "default" "dictsort"
@@ -67,20 +71,23 @@
 
 (defun jinja2-find-open-tag ()
   (if (search-backward-regexp
-       (rx "{%"
-	   (* whitespace)
-	   (? (group
-	       "end"))
-	   (group
-	    (* word))
-	   (group
-	    (*? anything))
-	   (* whitespace)
-	   "%}") nil t)
-      (if (match-string 1) ;; End tag, going on
-	  (jinja2-find-open-tag)
-        (match-data))
-    nil))
+       (rx-to-string
+	`(and "{%"
+	      (* whitespace)
+	      (? (group
+		  "end"))
+	      (group
+	       ,(append '(or)
+			jinja2-closing-keywords
+			))
+	      (group
+	       (*? anything))
+	      (* whitespace)
+	      "%}")) nil t)
+       (if (match-string 1) ;; End tag, going on
+	   (jinja2-find-open-tag)
+	 (match-data))
+       nil))
 
 (defun jinja2-close-tag ()
   "Close the previously opened template tag."
@@ -140,7 +147,7 @@
      (,(rx-to-string `(and (group "|" (* whitespace))
 		       (group
 			,(append '(or)
-				 jinja2-font-lock-functions-keywords
+				 jinja2-functions-keywords
 				 ))))
       (1 font-lock-keyword-face t)
       (2 font-lock-function-name-face t)
@@ -148,12 +155,12 @@
      (,(rx-to-string `(and word-start
 	   (? "end")
 	   ,(append '(or)
-		    jinja2-font-lock-indenting-keywords
+		    jinja2-indenting-keywords
 	    )
 	   word-end)) (0 font-lock-keyword-face))
      (,(rx-to-string `(and word-start
 	   ,(append '(or)
-		    jinja2-font-lock-builtin-keywords
+		    jinja2-builtin-keywords
 	    )
 	   word-end)) (0 font-lock-builtin-face))
 
@@ -198,12 +205,12 @@
 	  (progn
 	    (save-excursion
 	      (forward-line -1)
-	      (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt jinja2-font-lock-indenting-keywords)))
+	      (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt jinja2-indenting-keywords)))
 		  (progn
 		    (setq cur-indent (current-indentation))
 		    ;; (message (format "Jinja_No1] jinja : %d sgml : %d" cur-indent html-indentation ))
 		    )
-		(if (looking-at (concat "^[ \t]*{% *" (regexp-opt jinja2-font-lock-indenting-keywords)))
+		(if (looking-at (concat "^[ \t]*{% *" (regexp-opt jinja2-indenting-keywords)))
 		    (setq cur-indent (current-indentation))
 		  (setq cur-indent (- (current-indentation) indent-width)))
 	      ;; (message (format "Jinja_end1] jinja : %d sgml : %d" cur-indent html-indentation ))
@@ -224,12 +231,12 @@
 		    (setq cur-indent (current-indentation))
 		    ;; (message (format "Jinja_end2] jinja : %d sgml : %d" cur-indent html-indentation ))
 		    (setq not-indented nil))
-		(if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt jinja2-font-lock-indenting-keywords)))
+		(if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt jinja2-indenting-keywords)))
 		    (progn
 		      (setq cur-indent (current-indentation))
 		      ;; (message (format "Jinja_No] jinja : %d sgml : %d" cur-indent html-indentation ))
 		      (setq not-indented nil))
-		  (if (looking-at (concat "^[ \t]*{% *" (regexp-opt jinja2-font-lock-indenting-keywords))) ; Check start tag
+		  (if (looking-at (concat "^[ \t]*{% *" (regexp-opt jinja2-indenting-keywords))) ; Check start tag
 		      (progn
 			(setq cur-indent (+ (current-indentation) indent-width))
 			;; (message (format "Jinja_open] jinja : %d sgml : %d" cur-indent html-indentation ))
@@ -261,7 +268,7 @@
           . sgml-font-lock-syntactic-keywords)))
   (set (make-local-variable 'indent-line-function) 'jinja2-indent-line))
 
-(define-key jinja2-mode-map (kbd "C-à") 'jinja2-close-tag)
+(define-key jinja2-mode-map (kbd "C-c c") 'jinja2-close-tag)
 
 (add-to-list 'auto-mode-alist '("\\.jinja2\\'" . jinja2-mode))
 (provide 'jinja2-mode)
