@@ -26,18 +26,25 @@
 
 (require 'sgml-mode)
 
-(defconst jinja2-closing-keywords
-  '(
-    "if" "for" "block" "filter" "with"
-    "raw" "macro" "autoescape" "trans" "call"
-    ;; Hydra specific
-    "auth" "showonmatch" "errorproof"))
+(if (not (boundp 'jinja2-user-keywords))
+	 (setq jinja2-user-keywords nil))
+(if (not (boundp 'jinja2-user-functions))
+	 (setq jinja2-user-functions nil))
 
-(defconst jinja2-indenting-keywords
-  (append jinja2-closing-keywords
-	  '("else" "elif" )))
+(defun jinja2-closing-keywords ()
+  (append
+   jinja2-user-keywords
+   '(
+     "if" "for" "block" "filter" "with"
+     "raw" "macro" "autoescape" "trans" "call"
+     )))
 
-(defconst jinja2-builtin-keywords
+(defun jinja2-indenting-keywords ()
+  (append
+   (jinja2-closing-keywords)
+   '("else" "elif" )))
+
+(defun jinja2-builtin-keywords ()
   '(
     "as" "autoescape" "debug" "extends"
     "firstof" "in" "include" "load"
@@ -50,8 +57,11 @@
     "context" "with" "without" "ignore"
     "missing" "scoped"))
 
-(defconst jinja2-functions-keywords
-  '(
+(defun jinja2-functions-keywords ()
+  (message "CALLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
+  (append
+   jinja2-user-functions
+   '(
     "abs" "attr" "batch" "capitalize"
     "center" "default" "dictsort"
     "escape" "filesizeformat" "first"
@@ -63,11 +73,7 @@
     "sort" "string" "striptags" "sum"
     "title" "trim" "truncate" "upper"
     "urlize" "wordcount" "wordwrap" "xmlattr"
-    ;; Hydra specific
-    "date_format" "money_format"
-    "money_format_no_currency" "sublength"
-    "json" "percent_format" "person_title"
-    "mail_format" "sort_by" "split"))
+    )))
 
 (defun jinja2-find-open-tag ()
   (if (search-backward-regexp
@@ -78,7 +84,7 @@
 		  "end"))
 	      (group
 	       ,(append '(or)
-			jinja2-closing-keywords
+			(jinja2-closing-keywords)
 			))
 	      (group
 	       (*? anything))
@@ -147,7 +153,7 @@
      (,(rx-to-string `(and (group "|" (* whitespace))
 		       (group
 			,(append '(or)
-				 jinja2-functions-keywords
+				 (jinja2-functions-keywords)
 				 ))))
       (1 font-lock-keyword-face t)
       (2 font-lock-function-name-face t)
@@ -155,12 +161,12 @@
      (,(rx-to-string `(and word-start
 	   (? "end")
 	   ,(append '(or)
-		    jinja2-indenting-keywords
+		    (jinja2-indenting-keywords)
 	    )
 	   word-end)) (0 font-lock-keyword-face))
      (,(rx-to-string `(and word-start
 	   ,(append '(or)
-		    jinja2-builtin-keywords
+		    (jinja2-builtin-keywords)
 	    )
 	   word-end)) (0 font-lock-builtin-face))
 
@@ -205,12 +211,12 @@
 	  (progn
 	    (save-excursion
 	      (forward-line -1)
-	      (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt jinja2-indenting-keywords)))
+	      (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
 		  (progn
 		    (setq cur-indent (current-indentation))
 		    ;; (message (format "Jinja_No1] jinja : %d sgml : %d" cur-indent html-indentation ))
 		    )
-		(if (looking-at (concat "^[ \t]*{% *" (regexp-opt jinja2-indenting-keywords)))
+		(if (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords))))
 		    (setq cur-indent (current-indentation))
 		  (setq cur-indent (- (current-indentation) indent-width)))
 	      ;; (message (format "Jinja_end1] jinja : %d sgml : %d" cur-indent html-indentation ))
@@ -231,12 +237,12 @@
 		    (setq cur-indent (current-indentation))
 		    ;; (message (format "Jinja_end2] jinja : %d sgml : %d" cur-indent html-indentation ))
 		    (setq not-indented nil))
-		(if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt jinja2-indenting-keywords)))
+		(if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
 		    (progn
 		      (setq cur-indent (current-indentation))
 		      ;; (message (format "Jinja_No] jinja : %d sgml : %d" cur-indent html-indentation ))
 		      (setq not-indented nil))
-		  (if (looking-at (concat "^[ \t]*{% *" (regexp-opt jinja2-indenting-keywords))) ; Check start tag
+		  (if (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords)))) ; Check start tag
 		      (progn
 			(setq cur-indent (+ (current-indentation) indent-width))
 			;; (message (format "Jinja_open] jinja : %d sgml : %d" cur-indent html-indentation ))
