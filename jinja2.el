@@ -58,7 +58,6 @@
     "missing" "scoped"))
 
 (defun jinja2-functions-keywords ()
-  (message "CALLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
   (append
    jinja2-user-functions
    '(
