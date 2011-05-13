@@ -26,16 +26,6 @@
 
 (require 'sgml-mode)
 
-(defvar jinja2-mode-hook nil)
-
-(defvar jinja2-mode-map
-  (let ((jinja2-mode-map (make-keymap)))
-    (define-key jinja2-mode-map "\C-j" 'newline-and-indent)
-    jinja2-mode-map)
-  "Keymap for Jinja2 major mode")
-
-(add-to-list 'auto-mode-alist '("\\.jinja2\\'" . jinja2-mode))
-
 (defconst jinja2-font-lock-indenting-keywords
   '(
     "if" "else" "elif" "for" "block" "filter" "with"
@@ -75,10 +65,7 @@
     "json" "percent_format" "person_title"
     "mail_format" "sort_by" "split"))
 
-(defun jinja2-html-find-open-tag ()
-  "Return open tag for closed template tag.
-
-If tags are unbalanced, raise error."
+(defun jinja2-find-open-tag ()
   (if (search-backward-regexp
        (rx "{%"
 	   (* whitespace)
@@ -90,22 +77,25 @@ If tags are unbalanced, raise error."
 	    (*? anything))
 	   (* whitespace)
 	   "%}") nil t)
-      (if (match-string 1)
-          (if (not (string= (match-string 2) (jinja2-html-find-open-tag)))
-              (error "Unmatched Jinja tag")
-            (jinja2-html-find-open-tag))
-        (match-string 2))
+      (if (match-string 1) ;; End tag, going on
+	  (jinja2-find-open-tag)
+        (match-data))
     nil))
 
-(defun jinja2-html-close-tag ()
+(defun jinja2-close-tag ()
   "Close the previously opened template tag."
   (interactive)
-  (let ((open-tag (save-excursion (jinja2-html-find-open-tag))))
+  (let ((open-tag (save-excursion (jinja2-find-open-tag))))
     (if open-tag
-        (insert
-         (format "{%% end%s %%}"
-                 open-tag))
-      (error "Nothing to close"))))
+	(progn (store-match-data open-tag)
+	       (insert
+		(if (string= (match-string 2) "block")
+		    (format "{%% end%s%s %%}"
+			    (match-string 2)(match-string 3))
+		  (format "{%% end%s %%}"
+			  (match-string 2)))))
+      (error "Nothing to close")))
+  (jinja2-indent-line))
 
 (defconst  jinja2-font-lock-comments
   `(
@@ -182,11 +172,6 @@ If tags are unbalanced, raise error."
 
 (defvar jinja2-font-lock-keywords
   jinja2-font-lock-keywords-1)
-
-(defvar jinja2-mode-syntax-table
-  (let ((jinja2-mode-syntax-table (make-syntax-table)))
-    jinja2-mode-syntax-table)
-  "Syntax table for jinja2-mode")
 
 (defun sgml-indent-line-num ()
   "Indent the current line as SGML."
@@ -275,4 +260,8 @@ If tags are unbalanced, raise error."
          (font-lock-syntactic-keywords
           . sgml-font-lock-syntactic-keywords)))
   (set (make-local-variable 'indent-line-function) 'jinja2-indent-line))
+
+(define-key jinja2-mode-map (kbd "C-à") 'jinja2-close-tag)
+
+(add-to-list 'auto-mode-alist '("\\.jinja2\\'" . jinja2-mode))
 (provide 'jinja2-mode)
