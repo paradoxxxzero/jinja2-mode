@@ -75,6 +75,38 @@
     "json" "percent_format" "person_title"
     "mail_format" "sort_by" "split"))
 
+(defun jinja2-html-find-open-tag ()
+  "Return open tag for closed template tag.
+
+If tags are unbalanced, raise error."
+  (if (search-backward-regexp
+       (rx "{%"
+	   (* whitespace)
+	   (? (group
+	       "end"))
+	   (group
+	    (* word))
+	   (group
+	    (*? anything))
+	   (* whitespace)
+	   "%}") nil t)
+      (if (match-string 1)
+          (if (not (string= (match-string 2) (jinja2-html-find-open-tag)))
+              (error "Unmatched Jinja tag")
+            (jinja2-html-find-open-tag))
+        (match-string 2))
+    nil))
+
+(defun jinja2-html-close-tag ()
+  "Close the previously opened template tag."
+  (interactive)
+  (let ((open-tag (save-excursion (jinja2-html-find-open-tag))))
+    (if open-tag
+        (insert
+         (format "{%% end%s %%}"
+                 open-tag))
+      (error "Nothing to close"))))
+
 (defconst  jinja2-font-lock-comments
   `(
     (,(rx "{#"
