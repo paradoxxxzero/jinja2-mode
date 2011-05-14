@@ -89,25 +89,27 @@
 	       (*? anything))
 	      (* whitespace)
 	      "%}")) nil t)
-       (if (match-string 1) ;; End tag, going on
-	   (jinja2-find-open-tag)
-	 (match-data))
-       nil))
+      (if (match-string 1) ;; End tag, going on
+	  (let ((matches (jinja2-find-open-tag)))
+	    (if (string= (car matches) (match-string 2))
+		(jinja2-find-open-tag)
+	      (list (match-string 2) (match-string 3))))
+	(list (match-string 2) (match-string 3)))
+    nil))
 
 (defun jinja2-close-tag ()
   "Close the previously opened template tag."
   (interactive)
   (let ((open-tag (save-excursion (jinja2-find-open-tag))))
     (if open-tag
-	(progn (store-match-data open-tag)
-	       (insert
-		(if (string= (match-string 2) "block")
-		    (format "{%% end%s%s %%}"
-			    (match-string 2)(match-string 3))
-		  (format "{%% end%s %%}"
-			  (match-string 2)))))
+	(insert
+	 (if (string= (car open-tag) "block")
+	     (format "{%% end%s%s %%}"
+		     (car open-tag)(nth 1 open-tag))
+	   (format "{%% end%s %%}"
+		   (match-string 2))))
       (error "Nothing to close")))
-  (jinja2-indent-line))
+  (save-excursion (jinja2-indent-line)))
 
 (defconst  jinja2-font-lock-comments
   `(
@@ -199,12 +201,11 @@
 	  (save-excursion indent-col)
 	indent-col))))
 
-(defun jinja2-indent-line ()
-  "Indent current line as WPDL code"
-  (interactive)
-  (beginning-of-line)
+
+(defun jinja2-calculate-indent ()
+  "Return indent column"
   (if (bobp)  ; Check begining of buffer
-      (indent-line-to (sgml-indent-line-num))
+      (sgml-indent-line-num)
     (let ((not-indented t) (indent-width 2) cur-indent (html-indentation (sgml-indent-line-num)))
       (if (looking-at "^[ \t]*{% *e\\(nd\\|lse\\|lif\\)") ; Check close tag
 	  (progn
@@ -254,8 +255,14 @@
 		      (if (bobp) ; We don't know
 			  (setq not-indented nil))))))))))
       (if cur-indent
-	  (indent-line-to cur-indent)
-	(indent-line-to html-indentation))))) ; If we didn't see an indentation hint, then allow no indentation
+	  cur-indent
+	html-indentation)))) ; If we didn't see an indentation hint, then allow no indentation
+
+(defun jinja2-indent-line ()
+  "Indent current line as Jinja code"
+  (interactive)
+  (beginning-of-line)
+  (indent-line-to (jinja2-calculate-indent)))
 
 ;;;###autoload
 (define-derived-mode jinja2-mode html-mode  "Jinja2"
