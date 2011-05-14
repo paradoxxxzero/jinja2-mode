@@ -201,68 +201,48 @@
 	  (save-excursion indent-col)
 	indent-col))))
 
+(defun jinja2-calculate-indent-backward (default)
+  "Return indent column based on previous lines"
+  (forward-line -1)
+  (if (looking-at "^[ \t]*{% *end") ; Don't indent after end
+      (current-indentation)
+    (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
+	(current-indentation)
+      (if (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords)))) ; Check start tag
+	  (+ (current-indentation) indent-width)
+	(if (looking-at "^[ \t]*<") ; Assume sgml block trust sgml
+	    default
+	  (if (bobp)
+	      0
+	    (jinja2-calculate-indent-backward default)))))))
+
 
 (defun jinja2-calculate-indent ()
   "Return indent column"
   (if (bobp)  ; Check begining of buffer
-      (sgml-indent-line-num)
-    (let ((not-indented t) (indent-width 2) cur-indent (html-indentation (sgml-indent-line-num)))
+      0
+    (let ((indent-width 2) (default (sgml-indent-line-num)))
       (if (looking-at "^[ \t]*{% *e\\(nd\\|lse\\|lif\\)") ; Check close tag
-	  (progn
-	    (save-excursion
-	      (forward-line -1)
-	      (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
-		  (progn
-		    (setq cur-indent (current-indentation))
-		    ;; (message (format "Jinja_No1] jinja : %d sgml : %d" cur-indent html-indentation ))
-		    )
-		(if (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords))))
-		    (setq cur-indent (current-indentation))
-		  (setq cur-indent (- (current-indentation) indent-width)))
-	      ;; (message (format "Jinja_end1] jinja : %d sgml : %d" cur-indent html-indentation ))
-	      )
-	      )
-	    (if (< cur-indent 0)
-		(setq cur-indent 0)))
-	(if (looking-at "^[ \t]*</") ; Assume sgml end block trust sgml
-	    (progn
-	      (setq cur-indent html-indentation)
-	      ;; (message (format "SGML_?1] jinja : %d sgml : %d" cur-indent html-indentation ))
-	      )
 	  (save-excursion
-	    (while not-indented
-	      (forward-line -1)
-	      (if (looking-at "^[ \t]*{% *end") ; Don't indent after end
-		  (progn
-		    (setq cur-indent (current-indentation))
-		    ;; (message (format "Jinja_end2] jinja : %d sgml : %d" cur-indent html-indentation ))
-		    (setq not-indented nil))
-		(if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
-		    (progn
-		      (setq cur-indent (current-indentation))
-		      ;; (message (format "Jinja_No] jinja : %d sgml : %d" cur-indent html-indentation ))
-		      (setq not-indented nil))
-		  (if (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords)))) ; Check start tag
-		      (progn
-			(setq cur-indent (+ (current-indentation) indent-width))
-			;; (message (format "Jinja_open] jinja : %d sgml : %d" cur-indent html-indentation ))
-			(setq not-indented nil))
-		    (if (looking-at "^[ \t]*<") ; Assume sgml block trust sgml
-			(progn
-			  (setq cur-indent html-indentation)
-			  ;; (message (format "SGML_?] jinja : %d sgml : %d" cur-indent html-indentation ))
-			  (setq not-indented nil))
-		      (if (bobp) ; We don't know
-			  (setq not-indented nil))))))))))
-      (if cur-indent
-	  cur-indent
-	html-indentation)))) ; If we didn't see an indentation hint, then allow no indentation
+	    (forward-line -1)
+	    (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
+		(current-indentation)
+	      (if (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords))))
+		  (current-indentation)
+		(- (current-indentation) indent-width))))
+	(if (looking-at "^[ \t]*</") ; Assume sgml end block trust sgml
+	    default
+	  (save-excursion
+	    (jinja2-calculate-indent-backward default)))))))
 
 (defun jinja2-indent-line ()
   "Indent current line as Jinja code"
   (interactive)
   (beginning-of-line)
-  (indent-line-to (jinja2-calculate-indent)))
+  (let ((indent (jinja2-calculate-indent)))
+    (if (< indent 0)
+	(setq indent 0))
+    (indent-line-to indent)))
 
 ;;;###autoload
 (define-derived-mode jinja2-mode html-mode  "Jinja2"
