@@ -111,6 +111,27 @@
       (error "Nothing to close")))
   (save-excursion (jinja2-indent-line)))
 
+(defun jinja2-insert-tag ()
+  "Insert an empty tag"
+  (interactive)
+  (insert "{% ")
+  (save-excursion
+    (insert " %}")))
+
+(defun jinja2-insert-var ()
+  "Insert an empty tag"
+  (interactive)
+  (insert "{{ ")
+  (save-excursion
+    (insert " }}")))
+
+(defun jinja2-insert-comment ()
+  "Insert an empty tag"
+  (interactive)
+  (insert "{# ")
+  (save-excursion
+    (insert " #}")))
+
 (defconst  jinja2-font-lock-comments
   `(
     (,(rx "{#"
@@ -225,11 +246,12 @@
       (if (looking-at "^[ \t]*{% *e\\(nd\\|lse\\|lif\\)") ; Check close tag
 	  (save-excursion
 	    (forward-line -1)
-	    (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
+	    (if
+		(and
+		 (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords))))
+		 (not (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))))
 		(current-indentation)
-	      (if (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords))))
-		  (current-indentation)
-		(- (current-indentation) indent-width))))
+	      (- (current-indentation) indent-width)))
 	(if (looking-at "^[ \t]*</") ; Assume sgml end block trust sgml
 	    default
 	  (save-excursion
@@ -261,6 +283,9 @@
   (set (make-local-variable 'indent-line-function) 'jinja2-indent-line))
 
 (define-key jinja2-mode-map (kbd "C-c c") 'jinja2-close-tag)
+(define-key jinja2-mode-map (kbd "C-c t") 'jinja2-insert-tag)
+(define-key jinja2-mode-map (kbd "C-c v") 'jinja2-insert-var)
+(define-key jinja2-mode-map (kbd "C-c #") 'jinja2-insert-comment)
 
 (add-to-list 'auto-mode-alist '("\\.jinja2\\'" . jinja2-mode))
 (provide 'jinja2-mode)
