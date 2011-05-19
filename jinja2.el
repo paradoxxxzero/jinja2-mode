@@ -114,6 +114,7 @@
 (defun jinja2-insert-tag ()
   "Insert an empty tag"
   (interactive)
+  (jinja2-indent-line)
   (insert "{% ")
   (save-excursion
     (insert " %}")))
@@ -121,6 +122,7 @@
 (defun jinja2-insert-var ()
   "Insert an empty tag"
   (interactive)
+  (jinja2-indent-line)
   (insert "{{ ")
   (save-excursion
     (insert " }}")))
@@ -128,6 +130,7 @@
 (defun jinja2-insert-comment ()
   "Insert an empty tag"
   (interactive)
+  (jinja2-indent-line)
   (insert "{# ")
   (save-excursion
     (insert " #}")))
