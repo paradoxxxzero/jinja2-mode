@@ -290,5 +290,7 @@
 (define-key jinja2-mode-map (kbd "C-c v") 'jinja2-insert-var)
 (define-key jinja2-mode-map (kbd "C-c #") 'jinja2-insert-comment)
 
+;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.jinja2\\'" . jinja2-mode))
+
 (provide 'jinja2-mode)
