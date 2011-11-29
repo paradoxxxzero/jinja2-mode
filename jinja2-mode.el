@@ -245,7 +245,7 @@
   "Return indent column"
   (if (bobp)  ; Check begining of buffer
       0
-    (let ((indent-width 2) (default (sgml-indent-line-num)))
+    (let ((indent-width sgml-basic-offset) (default (sgml-indent-line-num)))
       (if (looking-at "^[ \t]*{% *e\\(nd\\|lse\\|lif\\)") ; Check close tag
 	  (save-excursion
 	    (forward-line -1)
