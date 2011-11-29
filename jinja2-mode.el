@@ -228,18 +228,19 @@
 (defun jinja2-calculate-indent-backward (default)
   "Return indent column based on previous lines"
   (forward-line -1)
-  (if (looking-at "^[ \t]*{% *end") ; Don't indent after end
-      (current-indentation)
-    (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
+  (let ((indent-width sgml-basic-offset) (default (sgml-indent-line-num)))
+    (if (looking-at "^[ \t]*{% *end") ; Don't indent after end
 	(current-indentation)
-      (if (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords)))) ; Check start tag
-	  (+ (current-indentation) indent-width)
-	(if (looking-at "^[ \t]*<") ; Assume sgml block trust sgml
-	    default
-	  (if (bobp)
-	      0
-	    (jinja2-calculate-indent-backward default)))))))
-
+      (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
+	  (current-indentation)
+	(if (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords)))) ; Check start tag
+	    (+ (current-indentation) indent-width)
+	  (if (looking-at "^[ \t]*<") ; Assume sgml block trust sgml
+	      default
+	    (if (bobp)
+		0
+	      (jinja2-calculate-indent-backward default))))))))
+  
 
 (defun jinja2-calculate-indent ()
   "Return indent column"
