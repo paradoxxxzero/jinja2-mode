@@ -227,8 +227,8 @@
 
 (defun jinja2-calculate-indent-backward (default)
   "Return indent column based on previous lines"
-  (forward-line -1)
   (let ((indent-width sgml-basic-offset) (default (sgml-indent-line-num)))
+    (forward-line -1)
     (if (looking-at "^[ \t]*{% *end") ; Don't indent after end
 	(current-indentation)
       (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
