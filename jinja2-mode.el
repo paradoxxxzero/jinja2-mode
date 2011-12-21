@@ -78,6 +78,7 @@
   (if (search-backward-regexp
        (rx-to-string
     `(and "{%"
+          (? "-")
           (* whitespace)
           (? (group
           "end"))
@@ -88,6 +89,7 @@
           (group
            (*? anything))
           (* whitespace)
+          (? "-")
           "%}")) nil t)
       (if (match-string 1) ;; End tag, going on
       (let ((matches (jinja2-find-open-tag)))
@@ -195,7 +197,7 @@
         )
        word-end)) (0 font-lock-builtin-face))
 
-     (,(rx (or "{%" "%}")) (0 font-lock-function-name-face t))
+     (,(rx (or "{%" "%}" "{%-" "-%}")) (0 font-lock-function-name-face t))
      (,(rx (or "{{" "}}")) (0 font-lock-type-face t))
      (,(rx "{#"
        (* whitespace)
@@ -229,11 +231,11 @@
   "Return indent column based on previous lines"
   (let ((indent-width sgml-basic-offset) (default (sgml-indent-line-num)))
     (forward-line -1)
-    (if (looking-at "^[ \t]*{% *end") ; Don't indent after end
+    (if (looking-at "^[ \t]*{%-? *end") ; Don't indent after end
     (current-indentation)
-      (if (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
+      (if (looking-at (concat "^[ \t]*{%-? *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
       (current-indentation)
-    (if (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords)))) ; Check start tag
+    (if (looking-at (concat "^[ \t]*{%-? *" (regexp-opt (jinja2-indenting-keywords)))) ; Check start tag
         (+ (current-indentation) indent-width)
       (if (looking-at "^[ \t]*<") ; Assume sgml block trust sgml
           default
@@ -247,13 +249,13 @@
   (if (bobp)  ; Check begining of buffer
       0
     (let ((indent-width sgml-basic-offset) (default (sgml-indent-line-num)))
-      (if (looking-at "^[ \t]*{% *e\\(nd\\|lse\\|lif\\)") ; Check close tag
+      (if (looking-at "^[ \t]*{%-? *e\\(nd\\|lse\\|lif\\)") ; Check close tag
       (save-excursion
         (forward-line -1)
         (if
         (and
-         (looking-at (concat "^[ \t]*{% *" (regexp-opt (jinja2-indenting-keywords))))
-         (not (looking-at (concat "^[ \t]*{% *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))))
+         (looking-at (concat "^[ \t]*{%-? *" (regexp-opt (jinja2-indenting-keywords))))
+         (not (looking-at (concat "^[ \t]*{%-? *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))))
         (current-indentation)
           (- (current-indentation) indent-width)))
     (if (looking-at "^[ \t]*</") ; Assume sgml end block trust sgml
