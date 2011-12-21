@@ -283,7 +283,7 @@
     (indent-line-to indent)))
 
 ;;;###autoload
-(define-derived-mode jinja2-mode html-mode  "Jinja2"
+(define-derived-mode jinja2-mode sgml-mode  "Jinja2"
   "Major mode for editing jinja2 files"
   :group 'jinja2
   ;; it mainly from sgml-mode font lock setting
