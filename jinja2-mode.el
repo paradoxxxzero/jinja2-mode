@@ -126,26 +126,26 @@
 (defun jinja2-insert-tag ()
   "Insert an empty tag"
   (interactive)
-  (jinja2-indent-line)
   (insert "{% ")
   (save-excursion
-    (insert " %}")))
+    (insert " %}")
+    (jinja2-indent-line)))
 
 (defun jinja2-insert-var ()
   "Insert an empty tag"
   (interactive)
-  (jinja2-indent-line)
   (insert "{{ ")
   (save-excursion
-    (insert " }}")))
+    (insert " }}")
+    (jinja2-indent-line)))
 
 (defun jinja2-insert-comment ()
   "Insert an empty tag"
   (interactive)
-  (jinja2-indent-line)
   (insert "{# ")
   (save-excursion
-    (insert " #}")))
+    (insert " #}")
+    (jinja2-indent-line)))
 
 (defconst jinja2-font-lock-comments
   `(
