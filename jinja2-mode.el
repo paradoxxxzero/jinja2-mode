@@ -243,7 +243,7 @@
     (forward-line -1)
     (if (looking-at "^[ \t]*{%-? *end") ; Don't indent after end
         (current-indentation)
-      (if (looking-at (concat "^[ \t]*{%-? *.*?{% *end" (regexp-opt (jinja2-indenting-keywords))))
+      (if (looking-at (concat "^[ \t]*{%-? *.*?{%-? *end" (regexp-opt (jinja2-indenting-keywords))))
           (current-indentation)
         (if (looking-at (concat "^[ \t]*{%-? *" (regexp-opt (jinja2-indenting-keywords)))) ; Check start tag
             (+ (current-indentation) indent-width)
