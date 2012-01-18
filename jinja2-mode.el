@@ -65,6 +65,7 @@
     "false" "none" "False" "True" "None"
     "loop" "super" "caller" "varargs"
     "kwargs" "break" "continue" "is"
+    "not" "or" "and"
     "do" "pluralize" "set" "from" "import"
     "context" "with" "without" "ignore"
     "missing" "scoped"))
