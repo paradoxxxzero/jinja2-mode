@@ -1,5 +1,8 @@
-;; Jinja2 mode for emacs
+;;; jinja2-mode.el --- A major mode for jinja2
+
 ;; Copyright (C) 2011 Florian Mounier aka paradoxxxzero
+
+;; Author: Florian Mounier aka paradoxxxzero
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -14,8 +17,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-;; Author: Florian Mounier aka paradoxxxzero
-;; Description :
+;;; Commentary:
+
 ;;   This is an emacs major mode for jinja2 with:
 ;;        syntax highlighting
 ;;        sgml/html integration
@@ -23,6 +26,8 @@
 ;;        more to come
 
 ;; This file comes from http://github.com/paradoxxxzero/jinja2-mode
+
+;;; Code:
 
 (require 'sgml-mode)
 
