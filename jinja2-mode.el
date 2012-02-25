@@ -282,11 +282,12 @@
 (defun jinja2-indent-line ()
   "Indent current line as Jinja code"
   (interactive)
-  (beginning-of-line)
-  (let ((indent (jinja2-calculate-indent)))
-    (if (< indent 0)
-        (setq indent 0))
-    (indent-line-to indent)))
+  (save-excursion
+    (beginning-of-line)
+    (let ((indent (jinja2-calculate-indent)))
+      (if (< indent 0)
+          (setq indent 0))
+      (indent-line-to indent))))
 
 ;;;###autoload
 (define-derived-mode jinja2-mode sgml-mode  "Jinja2"
