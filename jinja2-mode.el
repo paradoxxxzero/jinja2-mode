@@ -3,6 +3,7 @@
 ;; Copyright (C) 2011 Florian Mounier aka paradoxxxzero
 
 ;; Author: Florian Mounier aka paradoxxxzero
+;; Version: 0.1
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -316,3 +317,5 @@
 (add-to-list 'auto-mode-alist '("\\.jinja2\\'" . jinja2-mode))
 
 (provide 'jinja2-mode)
+
+;;; jinja2-mode.el ends here
