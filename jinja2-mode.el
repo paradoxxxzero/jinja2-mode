@@ -294,6 +294,7 @@
   "Major mode for editing jinja2 files"
   :group 'jinja2
   ;; it mainly from sgml-mode font lock setting
+  (modify-syntax-entry ?\'  "\"" sgml-mode-syntax-table)
   (set (make-local-variable 'comment-start) "{# ")
   (set (make-local-variable 'comment-end) " #}")
   (set (make-local-variable 'font-lock-defaults)
