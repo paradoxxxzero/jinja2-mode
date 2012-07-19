@@ -283,21 +283,21 @@
 (defun jinja2-indent-line ()
   "Indent current line as Jinja code"
   (interactive)
-  (save-excursion
-    (beginning-of-line)
-    (let ((indent (jinja2-calculate-indent)))
-      (if (< indent 0)
-          (setq indent 0))
-      (indent-line-to indent))))
+  (let ((indent (max 0 (jinja2-calculate-indent))))
+    (if (> indent (- (point) (line-beginning-position)))
+        (indent-line-to indent))
+    indent))
 
 ;;;###autoload
 (define-derived-mode jinja2-mode sgml-mode  "Jinja2"
   "Major mode for editing jinja2 files"
   :group 'jinja2
-  ;; it mainly from sgml-mode font lock setting
-  (modify-syntax-entry ?\'  "\"" sgml-mode-syntax-table)
+  ;; Disabling this because of this emacs bug: 
+  ;;  http://lists.gnu.org/archive/html/bug-gnu-emacs/2002-09/msg00041.html
+  ;; (modify-syntax-entry ?\'  "\"" sgml-mode-syntax-table)
   (set (make-local-variable 'comment-start) "{# ")
   (set (make-local-variable 'comment-end) " #}")
+  ;; it mainly from sgml-mode font lock setting
   (set (make-local-variable 'font-lock-defaults)
        '((
           jinja2-font-lock-keywords
