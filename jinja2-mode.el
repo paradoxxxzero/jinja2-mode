@@ -295,8 +295,10 @@
   ;; Disabling this because of this emacs bug: 
   ;;  http://lists.gnu.org/archive/html/bug-gnu-emacs/2002-09/msg00041.html
   ;; (modify-syntax-entry ?\'  "\"" sgml-mode-syntax-table)
-  (set (make-local-variable 'comment-start) "{# ")
-  (set (make-local-variable 'comment-end) " #}")
+  (set (make-local-variable 'comment-start) "{#")
+  (set (make-local-variable 'comment-start-skip) "{#")
+  (set (make-local-variable 'comment-end) "#}")
+  (set (make-local-variable 'comment-end-skip) "#}")
   ;; it mainly from sgml-mode font lock setting
   (set (make-local-variable 'font-lock-defaults)
        '((
