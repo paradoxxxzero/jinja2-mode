@@ -283,10 +283,14 @@
 (defun jinja2-indent-line ()
   "Indent current line as Jinja code"
   (interactive)
-  (let ((indent (max 0 (jinja2-calculate-indent))))
-    (if (> indent (- (point) (line-beginning-position)))
-        (indent-line-to indent))
-    indent))
+  (let ((old_indent (current-indentation)) (old_point (point)))
+    (move-beginning-of-line nil)
+    (let ((indent (max 0 (jinja2-calculate-indent))))
+      (indent-line-to indent)
+      (if (< old_indent (- old_point (line-beginning-position)))
+          (goto-char (+ (- indent old_indent) old_point)))
+      indent)))
+
 
 ;;;###autoload
 (define-derived-mode jinja2-mode sgml-mode  "Jinja2"
