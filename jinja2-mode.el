@@ -322,6 +322,8 @@
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.jinja2\\'" . jinja2-mode))
+;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.j2\\'" . jinja2-mode))
 
 (provide 'jinja2-mode)
 
