@@ -291,6 +291,10 @@
           (goto-char (+ (- indent old_indent) old_point)))
       indent)))
 
+(defun jinja2-indent-buffer()
+  (interactive)
+  (save-excursion
+    (indent-region (point-min) (point-max))))
 
 ;;;###autoload
 (define-derived-mode jinja2-mode html-mode  "Jinja2"
@@ -319,6 +323,7 @@
 (define-key jinja2-mode-map (kbd "C-c t") 'jinja2-insert-tag)
 (define-key jinja2-mode-map (kbd "C-c v") 'jinja2-insert-var)
 (define-key jinja2-mode-map (kbd "C-c #") 'jinja2-insert-comment)
+(add-hook 'after-save-hook 'jinja2-indent-buffer)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.jinja2\\'" . jinja2-mode))
