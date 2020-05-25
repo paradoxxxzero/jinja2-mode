@@ -263,7 +263,7 @@
 
 (defun jinja2-calculate-indent ()
   "Return indent column"
-  (if (bobp)  ; Check begining of buffer
+  (if (bobp)  ; Check beginning of buffer
       0
     (let ((indent-width sgml-basic-offset) (default (sgml-indent-line-num)))
       (if (looking-at "^[ \t]*{%-? *e\\(nd\\|lse\\|lif\\)") ; Check close tag
