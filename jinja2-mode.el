@@ -323,7 +323,9 @@
 (define-key jinja2-mode-map (kbd "C-c t") 'jinja2-insert-tag)
 (define-key jinja2-mode-map (kbd "C-c v") 'jinja2-insert-var)
 (define-key jinja2-mode-map (kbd "C-c #") 'jinja2-insert-comment)
-(add-hook 'after-save-hook 'jinja2-indent-buffer)
+(add-hook 'jinja2-mode-hook
+          (lambda ()
+            (add-hook 'after-save-hook 'jinja2-indent-buffer nil 'make-it-local)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.jinja2\\'" . jinja2-mode))
