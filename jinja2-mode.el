@@ -1,9 +1,9 @@
 ;;; jinja2-mode.el --- A major mode for jinja2
 
-;; Copyright (C) 2011 Florian Mounier aka paradoxxxzero
+;; Copyright (C) 2011-2022 Florian Mounier aka paradoxxxzero
 
 ;; Author: Florian Mounier aka paradoxxxzero
-;; Version: 0.2
+;; Version: 0.3
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
