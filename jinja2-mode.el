@@ -4,6 +4,7 @@
 
 ;; Author: Florian Mounier aka paradoxxxzero
 ;; Version: 0.3
+;; URL: https://github.com/paradoxxxzero/jinja2-mode
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,13 +21,11 @@
 
 ;;; Commentary:
 
-;;   This is an emacs major mode for jinja2 with:
+;;   This is a major mode for jinja2 with:
 ;;        syntax highlighting
 ;;        sgml/html integration
 ;;        indentation (working with sgml)
 ;;        more to come
-
-;; This file comes from http://github.com/paradoxxxzero/jinja2-mode
 
 ;;; Code:
 
@@ -39,13 +38,11 @@
 
 (defcustom jinja2-user-keywords nil
   "Custom keyword names"
-  :type '(repeat string)
-  :group 'jinja2)
+  :type '(repeat string))
 
 (defcustom jinja2-user-functions nil
   "Custom function names"
-  :type '(repeat string)
-  :group 'jinja2)
+  :type '(repeat string))
 
 ;; (defcustom jinja2-debug nil
 ;;   "Log indentation logic"
@@ -101,8 +98,7 @@
                   "end"))
               (group
                ,(append '(or)
-                        (jinja2-closing-keywords)
-                        ))
+                        (jinja2-closing-keywords)))
               (group
                (*? anything))
               (* whitespace)
@@ -131,7 +127,7 @@
   (save-excursion (jinja2-indent-line)))
 
 (defun jinja2-insert-tag ()
-  "Insert an empty tag"
+  "Insert an empty tag."
   (interactive)
   (insert "{% ")
   (save-excursion
@@ -139,7 +135,7 @@
     (jinja2-indent-line)))
 
 (defun jinja2-insert-var ()
-  "Insert an empty tag"
+  "Insert an empty tag."
   (interactive)
   (insert "{{ ")
   (save-excursion
@@ -147,7 +143,7 @@
     (jinja2-indent-line)))
 
 (defun jinja2-insert-comment ()
-  "Insert an empty tag"
+  "Insert an empty tag."
   (interactive)
   (insert "{# ")
   (save-excursion
@@ -155,12 +151,10 @@
     (jinja2-indent-line)))
 
 (defconst jinja2-font-lock-comments
-  `(
-    (,(rx "{#"
+  `((,(rx "{#"
           (* whitespace)
           (group
-           (*? anything)
-           )
+           (*? anything))
           (* whitespace)
           "#}")
      . (1 font-lock-comment-face t))))
@@ -179,60 +173,53 @@
   (append
    jinja2-font-lock-keywords-1
    jinja2-font-lock-keywords-2
-   `(
-     (,(rx "{{"
+   `((,(rx "{{"
            (* whitespace)
            (group
-            (*? anything)
-            )
+            (*? anything))
            (*
             "|" (* whitespace) (*? anything))
            (* whitespace)
-           "}}") (1 font-lock-variable-name-face t))
+           "}}")
+      (1 font-lock-variable-name-face t))
      (,(rx  (group "|" (* whitespace))
-            (group (+ word))
-            )
+            (group (+ word)))
       (1 font-lock-keyword-face t)
       (2 font-lock-warning-face t))
      (,(rx-to-string `(and (group "|" (* whitespace))
                            (group
                             ,(append '(or)
-                                     (jinja2-functions-keywords)
-                                     ))))
+                                     (jinja2-functions-keywords)))))
       (1 font-lock-keyword-face t)
-      (2 font-lock-function-name-face t)
-      )
+      (2 font-lock-function-name-face t))
      (,(rx-to-string `(and word-start
                            (? "end")
                            ,(append '(or)
-                                    (jinja2-indenting-keywords)
-                                    )
-                           word-end)) (0 font-lock-keyword-face))
+                                    (jinja2-indenting-keywords))
+                           word-end))
+      (0 font-lock-keyword-face))
      (,(rx-to-string `(and word-start
                            ,(append '(or)
-                                    (jinja2-builtin-keywords)
-                                    )
-                           word-end)) (0 font-lock-builtin-face))
-
+                                    (jinja2-builtin-keywords))
+                           word-end))
+      (0 font-lock-builtin-face))
      (,(rx (or "{%" "%}" "{%-" "-%}")) (0 font-lock-function-name-face t))
      (,(rx (or "{{" "}}")) (0 font-lock-type-face t))
      (,(rx "{#"
            (* whitespace)
            (group
-            (*? anything)
-            )
+            (*? anything))
            (* whitespace)
            "#}")
       (1 font-lock-comment-face t))
-     (,(rx (or "{#" "#}")) (0 font-lock-comment-delimiter-face t))
-     )))
+     (,(rx (or "{#" "#}")) (0 font-lock-comment-delimiter-face t)))))
 
 (defvar jinja2-font-lock-keywords
   jinja2-font-lock-keywords-1)
 
 (defvar jinja2-enable-indent-on-save nil)
 
-(defun sgml-indent-line-num ()
+(defun jinja2-sgml-indent-line-num ()
   "Indent the current line as SGML."
   (let* ((savep (point))
          (indent-col
@@ -247,8 +234,9 @@
         indent-col))))
 
 (defun jinja2-calculate-indent-backward (default)
-  "Return indent column based on previous lines"
-  (let ((indent-width sgml-basic-offset) (default (sgml-indent-line-num)))
+  "Return indent column based on previous lines."
+  (let ((indent-width sgml-basic-offset)
+        (default (jinja2-sgml-indent-line-num)))
     (forward-line -1)
     (if (looking-at "^[ \t]*{%-? *end") ; Don't indent after end
         (current-indentation)
@@ -264,10 +252,11 @@
 
 
 (defun jinja2-calculate-indent ()
-  "Return indent column"
+  "Return indent column."
   (if (bobp)  ; Check beginning of buffer
       0
-    (let ((indent-width sgml-basic-offset) (default (sgml-indent-line-num)))
+    (let ((indent-width sgml-basic-offset)
+          (default (jinja2-sgml-indent-line-num)))
       (if (looking-at "^[ \t]*{%-? *e\\(nd\\|lse\\|lif\\)") ; Check close tag
           (save-excursion
             (forward-line -1)
@@ -283,9 +272,10 @@
             (jinja2-calculate-indent-backward default)))))))
 
 (defun jinja2-indent-line ()
-  "Indent current line as Jinja code"
+  "Indent current line as Jinja code."
   (interactive)
-  (let ((old_indent (current-indentation)) (old_point (point)))
+  (let ((old_indent (current-indentation))
+        (old_point (point)))
     (move-beginning-of-line nil)
     (let ((indent (max 0 (jinja2-calculate-indent))))
       (indent-line-to indent)
@@ -294,15 +284,15 @@
       indent)))
 
 (defun jinja2-indent-buffer()
+  "Indent the entire buffer of Jinja code."
   (interactive)
   (save-excursion
     (indent-region (point-min) (point-max))))
 
 ;;;###autoload
-(define-derived-mode jinja2-mode html-mode  "Jinja2"
-  "Major mode for editing jinja2 files"
-  :group 'jinja2
-  ;; Disabling this because of this emacs bug: 
+(define-derived-mode jinja2-mode html-mode "Jinja2"
+  "Major mode for editing jinja2 files."
+  ;; Disabling this because of this emacs bug:
   ;;  http://lists.gnu.org/archive/html/bug-gnu-emacs/2002-09/msg00041.html
   ;; (modify-syntax-entry ?\'  "\"" sgml-mode-syntax-table)
   (set (make-local-variable 'comment-start) "{#")
@@ -321,9 +311,9 @@
           . sgml-font-lock-syntactic-keywords)))
   (set (make-local-variable 'indent-line-function) 'jinja2-indent-line))
 
-(define-key jinja2-mode-map (kbd "C-c c") 'jinja2-close-tag)
-(define-key jinja2-mode-map (kbd "C-c t") 'jinja2-insert-tag)
-(define-key jinja2-mode-map (kbd "C-c v") 'jinja2-insert-var)
+(define-key jinja2-mode-map (kbd "C-c C-c") 'jinja2-close-tag)
+(define-key jinja2-mode-map (kbd "C-c C-t") 'jinja2-insert-tag)
+(define-key jinja2-mode-map (kbd "C-c C-v") 'jinja2-insert-var)
 (define-key jinja2-mode-map (kbd "C-c #") 'jinja2-insert-comment)
 
 (when jinja2-enable-indent-on-save
